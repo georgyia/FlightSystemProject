@@ -1,0 +1,98 @@
+plugins {
+    id 'org.springframework.boot' version '2.6.7'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.10'
+}
+
+group = 'stork'
+version = '1.0.0'
+sourceCompatibility = '17'
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    serverImplementation.extendsFrom(implementation)
+    clientImplementation.extendsFrom(implementation)
+    commonImplementation.extendsFrom(implementation)
+}
+
+javafx {
+    version = '17.0.2'
+    modules = [ 'javafx.base', 'javafx.controls', 'javafx.fxml', 'javafx.media', 'javafx.web' ]
+    configuration = 'clientImplementation'
+}
+
+dependencies {
+    serverImplementation 'org.springframework.boot:spring-boot-starter-web'
+    serverImplementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    serverImplementation group: 'javassist', name: 'javassist', version: '3.12.1.GA'
+    serverImplementation 'org.json:json:20171018'
+
+    clientImplementation 'org.springframework.boot:spring-boot-starter-webflux'
+    clientImplementation 'com.dlsc:GMapsFX:11.0.6'
+
+    commonImplementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    commonImplementation group: 'javassist', name: 'javassist', version: '3.12.1.GA'
+    commonImplementation 'org.json:json:20171018'
+    commonImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.0.1'
+
+    serverImplementation 'org.postgresql:postgresql'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+}
+
+
+sourceSets {
+    test {
+        java {
+            srcDir 'src/test/java'
+        }
+        resources {
+            'src/test/resources'
+        }
+    }
+    common {
+        java {
+            srcDir 'src/common/java'
+        }
+    }
+    server {
+        java {
+            srcDir 'src/server/java'
+        }
+        resources {
+            srcDir 'src/server/resources'
+        }
+        compileClasspath += common.output
+        runtimeClasspath += common.output
+    }
+    client {
+        java {
+            srcDir 'src/client/java'
+        }
+        resources {
+            srcDir 'src/client/resources'
+        }
+        compileClasspath += common.output
+        runtimeClasspath += common.output
+    }
+}
+
+test {
+    defaultCharacterEncoding = 'UTF-8'
+    useJUnitPlatform()
+}
+
+rootProject.tasks.named("processServerResources") {
+    duplicatesStrategy = 'include'
+}
+rootProject.tasks.named("processClientResources") {
+    duplicatesStrategy = 'include'
+}
